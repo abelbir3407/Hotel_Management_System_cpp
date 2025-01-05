@@ -1,92 +1,95 @@
-#include <iostream>
-#include <iomanip>
-#include <string>
+#include <iostream>  // For input/output operations
+#include <iomanip>   // For formatting output
+#include <cstring>   // For string operations (not heavily used here)
+
 using namespace std;
 
-const int TOTAL_ROOMS = 100, NUM_ROOM_TYPES = 5;
-string roomTypes[] = {"Single", "Double", "Family", "Deluxe", "Suite"};
-int roomPrices[] = {1500, 2500, 5000, 8000, 10000};
-int roomSizes[] = {50, 30, 10, 7, 3};
+// Constants to define the total number of rooms and room types in the hotel
+const int TOTAL_ROOMS = 100;      // Total number of rooms in the hotel
+const int NUM_ROOM_TYPES = 5;     // Number of different room types
 
-int roomsReserved[NUM_ROOM_TYPES] = {0};
-int prefixRoomSizes[NUM_ROOM_TYPES+1] = {0};
-int num_available_rooms = TOTAL_ROOMS;
+// Arrays to hold information about room types
+string roomTypes[] = {"Single", "Double", "Family", "Deluxe", "Suite"}; // Names of room types
+int roomPrices[] = {1500, 2500, 5000, 8000, 10000};                     // Prices for each room type
+int roomSizes[] = {50, 30, 10, 7, 3};                                  // Number of rooms available for each type
 
+// Arrays to keep track of room availability and reservations
+int roomsReserved[NUM_ROOM_TYPES] = {0};          // Number of rooms reserved for each type
+int prefixRoomSizes[NUM_ROOM_TYPES + 1] = {0};    // Used to calculate the range of room numbers for each type
+int num_available_rooms = TOTAL_ROOMS;            // Total number of available rooms in the hotel
+
+// Array to indicate if a room is available (true means available, false means booked)
 bool roomAvailability[TOTAL_ROOMS];
-string personalInfo[TOTAL_ROOMS][3]; // to store id, name, and phone number
 
+// Array to store user information for each room: Name, ID, and Phone
+string personalInfo[TOTAL_ROOMS][3];
+
+// Function prototypes (declaring functions before their implementation for clarity)
 int showMenu();
-int bookRoom();
+void bookRoom();
 int searchById();
 void showRoomAvailability();
 void showRoomDetails();
 void showUsersList();
 void leaveRoom();
 
+// Main function - The entry point of the program
 int main() {
+    // Displaying a welcome message
     cout << "\n============================================\n";
     cout << "\033[1;32m" << "         Welcome to Utopia Hotel        " << "\033[0m\n";
     cout << "============================================\n";
 
-    //  these variables are used by the user
-    int choice;
-    for(int i = 0; i < TOTAL_ROOMS; i++){
+    // Initialize all rooms to be available (true = available)
+    for (int i = 0; i < TOTAL_ROOMS; i++) {
         roomAvailability[i] = true;
     }
 
-    // this is creating prefix sum array for the range of rooms in each type
-    for(int i = 0; i < NUM_ROOM_TYPES; i++){
-        prefixRoomSizes[i+1] = prefixRoomSizes[i] + roomSizes[i];
+    // Calculate the prefix sum array for room type ranges
+    // This helps in determining the range of room numbers for each room type
+    for (int i = 0; i < NUM_ROOM_TYPES; i++) {
+        prefixRoomSizes[i + 1] = prefixRoomSizes[i] + roomSizes[i];
     }
 
+    // Infinite loop to keep showing the menu until the user chooses to exit
     while (true) {
-        choice = showMenu();
-        switch(choice){
-        case 1:
-            bookRoom();
-            break;
-        case 2:
-            showRoomAvailability();
-            break;
-        case 3:
-            showRoomDetails();
-            break;
-        case 4:
-            showUsersList();
-            break;
+        int choice = showMenu();  // Display the menu and get the user's choice
+        switch (choice) {
+        case 1: bookRoom(); break;                     // Book a room
+        case 2: showRoomAvailability(); break;         // Check which rooms are available
+        case 3: showRoomDetails(); break;              // Display detailed information about all rooms
+        case 4: showUsersList(); break;                // Show a list of all users who have booked rooms
         case 5:
-            if (searchById() == -1){
-                cout << "\033[1;31m" << "User not found!" << "\033[0m";
-                cout << "\v\v\v";
+            if (searchById() == -1) {  // Search for a user by their ID
+                cout << "\033[1;31m" << "User not found!" << "\033[0m\n";
             }
             break;
-        case 6:
-            leaveRoom();
-            break;
-        case 7:
-            return 0;
-        default:
+        case 6: leaveRoom(); break;                    // Vacate a room
+        case 7: return 0;                              // Exit the program
+        default:                                       // Handle invalid choices
             cout << "\033[1;31m" << "Invalid choice! Please try again." << "\033[0m\n";
         }
     }
 
-    return 0;
+    return 0;  // Program ends successfully
 }
 
-int showMenu(){
-    int choice;
+// Function to display the main menu and get the user's choice
+int showMenu() {
+    int choice;  // Variable to store the user's menu choice
 
-    menuchoice:
-        cout << "\n********** Hotel Menu **********\n";
-        cout << "1. Book a Room\n";
-        cout << "2. Check Room Availability\n";
-        cout << "3. Display Room Details\n";
-        cout << "4. Display Users List\n";
-        cout << "5. Search users by Id\n";
-        cout << "6. Leave room\n";
-        cout << "7. Exit\n";
-        cout << "Enter your choice: ";
-        cin >> choice;
+menuChoice:  // Label to allow retrying in case of invalid input
+    cout << "\n********** Hotel Menu **********\n";
+    cout << "1. Book a Room\n";
+    cout << "2. Check Room Availability\n";
+    cout << "3. Display Room Details\n";
+    cout << "4. Display Users List\n";
+    cout << "5. Search users by ID\n";
+    cout << "6. Leave room\n";
+    cout << "7. Exit\n";
+    cout << "Enter your choice: ";
+    cin >> choice;  // Get input from the user
+
 
         if (cin.fail() || (choice < 1 || choice > 7)){
             cout << "\033[1;31m" << "Invalid choice, please try again" << "\033[0m" << endl;
@@ -96,7 +99,7 @@ int showMenu(){
         }
     return choice;
 }
-
+// hotel management system
 int registerInfo(int roomNumber){
     string name, id, phone;
     cout << "Enter your name: ";
